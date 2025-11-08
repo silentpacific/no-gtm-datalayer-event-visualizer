@@ -253,3 +253,25 @@
     if (hookDataLayer()) clearInterval(timer);
   }, 1000);
 })();
+
+// ─── AUTO REINJECT ON SPA OR PAGE NAVIGATION ───────────────────────────────
+window.addEventListener("popstate", () => {
+  setTimeout(() => {
+    if (!window.__GA4_OVERLAY_ACTIVE__) location.reload();
+  }, 800);
+});
+
+window.addEventListener("beforeunload", () => {
+  sessionStorage.setItem("__GA4_RELOAD_OVERLAY__", "1");
+});
+
+if (sessionStorage.getItem("__GA4_RELOAD_OVERLAY__") === "1") {
+  sessionStorage.removeItem("__GA4_RELOAD_OVERLAY__");
+  setTimeout(() => {
+    fetch('https://raw.githubusercontent.com/silentpacific/no-gtm-datalayer-event-visualizer/main/ga4-overlay.js')
+      .then(r => r.text())
+      .then(eval)
+      .catch(console.error);
+  }, 1000);
+}
+
